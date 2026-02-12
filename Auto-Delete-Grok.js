@@ -1,185 +1,96 @@
 (async () => {
-
     const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
-
-
+    // Force click using PointerEvents to bypass Radix UI / Shadow DOM restrictions
     const forcePointerClick = (el) => {
-
         const options = { bubbles: true, cancelable: true, composed: true, pointerType: 'mouse' };
-
         el.dispatchEvent(new PointerEvent('pointerdown', options));
-
         el.dispatchEvent(new PointerEvent('pointerup', options));
-
-        el.click();
-
+        el.click(); // Standard click fallback
     };
 
-
-
+    // Helper to find elements with a retry mechanism
     const findWithRetry = async (selectorFn, name, retries = 3) => {
-
         for (let i = 1; i <= retries; i++) {
-
             const el = selectorFn();
-
             if (el) return el;
-
             await sleep(100); 
-
         }
-
         return null;
-
     };
 
-
-
-    console.log("🚀 Memulai Mode Turbo Pembersihan Massal...");
-
-
+    console.log("🚀 Starting Turbo Mass Deletion Mode for Grok Imagine...");
 
     while (true) {
-
-        // --- LANGKAH AWAL: Klik List Item (Buka Folder/Kontainer) ---
-
+        // --- STEP 1: Open the List Item (The Image/Card Container) ---
         const firstCard = document.querySelector('div[role="listitem"] .cursor-pointer');
-
         
-
         if (firstCard) {
-
-            console.log("📂 Membuka List Item...");
-
+            console.log("📂 Opening List Item...");
             forcePointerClick(firstCard);
-
-            await sleep(300); // Jeda sedikit lebih lama agar konten di dalamnya render
-
+            await sleep(400); // Slight delay to allow the modal/options to render
         } else {
-
-            // Jika tidak ada listitem dan tidak ada tombol More Options, berarti benar-benar habis
-
+            // Exit if no list items and no action buttons are visible
             if (!document.querySelector('button[aria-label="More options"]')) {
-
-                console.log("✅ Semua List Item dan Video sudah habis!");
-
+                console.log("✅ All items and videos have been cleared!");
                 break;
-
             }
-
         }
 
-
-
-        // --- SUB-LOOP: Hapus semua video di dalam listitem yang aktif ---
-
+        // --- SUB-LOOP: Delete all items inside the currently active container ---
         let deleteFoundInLoop = true;
-
         while (deleteFoundInLoop) {
-
-            // 1. Cari tombol More Options
-
+            // 1. Find the "More options" (Ellipsis) button
             const btnMore = await findWithRetry(
-
                 () => document.querySelector('button[aria-label="More options"]'),
-
                 "More Options"
-
             );
-
-
 
             if (!btnMore) {
-
-                console.log("⏭️ Habis di list ini, mencari list item berikutnya...");
-
+                console.log("⏭️ Current list cleared, searching for next list item...");
                 deleteFoundInLoop = false;
-
                 break; 
-
             }
-
-
 
             forcePointerClick(btnMore);
+            await sleep(150);
 
-            await sleep(100);
-
-
-
-            // 2. Klik Menu Delete
-
+            // 2. Click the "Delete" menu item
             const menuDelete = await findWithRetry(
-
                 () => Array.from(document.querySelectorAll('div[role="menuitem"], .relative'))
-
                            .find(el => el.textContent.toLowerCase().includes('delete')),
-
-                "Menu Delete"
-
+                "Delete Menu"
             );
-
-
 
             if (menuDelete) {
-
                 forcePointerClick(menuDelete);
-
-                await sleep(100);
-
+                await sleep(150);
             } else {
-
-                // Jika menu tidak muncul, mungkin butuh klik ulang More Options
-
+                // Close the menu and retry if the delete option didn't appear
                 document.body.click(); 
-
-                await sleep(100);
-
+                await sleep(150);
                 continue;
-
             }
 
-
-
-            // 3. Konfirmasi Delete
-
+            // 3. Confirm the Deletion (Red Button)
             const btnConfirm = await findWithRetry(
-
                 () => Array.from(document.querySelectorAll('button'))
-
                            .find(el => el.textContent.trim() === 'Delete video' || el.classList.contains('text-red-400')),
-
-                "Konfirmasi"
-
+                "Confirm Button"
             );
 
-
-
             if (btnConfirm) {
-
                 forcePointerClick(btnConfirm);
-
-                console.log("🗑️ Video Terhapus!");
-
-                await sleep(200); // Sinkronisasi database cepat
-
+                console.log("🗑️ Item Deleted!");
+                await sleep(250); // Database sync delay
             } else {
-
+                // If confirm button is missing, click away to reset
                 document.body.click();
-
-                await sleep(100);
-
+                await sleep(150);
             }
-
         }
-
         
-
-        // Jeda sangat singkat sebelum mencari listitem berikutnya
-
-        await sleep(100);
-
+        // Short pause before opening the next list item
+        await sleep(200);
     }
-
 })();
