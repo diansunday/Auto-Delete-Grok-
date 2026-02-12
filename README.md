@@ -1,8 +1,6 @@
 **Grok Imagine Auto-Delete Script**
 
 
-**Grok Imagine Auto-Delete Script**
-
 This script automates the deletion of favorite items on grok.com/imagine/favorites.
 
 **How it works:**
