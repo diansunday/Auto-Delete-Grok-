@@ -1,4 +1,4 @@
-# Auto-Delete-Grok-
+**Grok Imagine Auto-Delete Script**
 
 
 **Grok Imagine Auto-Delete Script**
